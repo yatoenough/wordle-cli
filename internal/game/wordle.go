@@ -1,7 +1,13 @@
 package game
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/yatoenough/wordle-cli/internal/dictionary"
+)
 
 func Run() {
-	fmt.Println("Hello, World!")
+	dict := dictionary.MustLoadDictionary()
+
+	fmt.Println(len(*dict.Words))
 }
