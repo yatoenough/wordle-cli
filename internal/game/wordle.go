@@ -10,4 +10,5 @@ func Run() {
 	dict := dictionary.MustLoadDictionary()
 
 	fmt.Println(len(*dict.Words))
+	fmt.Println(dict.GetRandomWord())
 }
