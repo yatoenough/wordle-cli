@@ -1,6 +1,6 @@
 # Wordle Game CLI
 
-A command-line Wordle game written in Go
+A command-line Wordle game, wrote it for fun in a few hours
 
 ## Installation
 
