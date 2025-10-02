@@ -34,7 +34,15 @@ func (d *Dictionary) GetRandomWord() string {
 }
 
 func parseDictionary(dict string) []string {
-	parsed := strings.Split(dict, "\n")
+	lines := strings.Split(dict, "\n")
+	parsed := make([]string, 0, len(lines))
+
+	for _, line := range lines {
+		word := strings.TrimSpace(line)
+		if word != "" {
+			parsed = append(parsed, word)
+		}
+	}
 
 	return parsed
 }
