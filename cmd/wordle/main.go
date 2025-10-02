@@ -10,6 +10,6 @@ func main() {
 
 	wordToGuess := dict.GetRandomWord()
 
-	game := game.NewWordleGame(wordToGuess, dict)
+	game := game.NewWordleGame(wordToGuess, dict, 6)
 	game.Run()
 }

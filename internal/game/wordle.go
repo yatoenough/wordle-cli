@@ -2,72 +2,61 @@ package game
 
 import (
 	"fmt"
-	"log"
-	"os"
-	"os/exec"
-	"runtime"
-	"strings"
 
 	"github.com/yatoenough/wordle-cli/internal/dictionary"
-)
-
-const (
-	green  = "\033[32m"
-	yellow = "\033[33m"
-	gray   = "\033[90m"
-	reset  = "\033[0m"
+	"github.com/yatoenough/wordle-cli/internal/io"
 )
 
 type WordleGame struct {
 	wordToGuess string
 	userGuess   string
 	dict        *dictionary.Dictionary
+	guesses     []string
 	attempts    int
 	maxAttempts int
-	guesses     []string
 }
 
-func NewWordleGame(wordToGuess string, dict *dictionary.Dictionary) *WordleGame {
+func NewWordleGame(wordToGuess string, dict *dictionary.Dictionary, maxAttempts int) *WordleGame {
 	return &WordleGame{
 		wordToGuess: wordToGuess,
 		dict:        dict,
 		userGuess:   "",
-		attempts:    0,
-		maxAttempts: 6,
 		guesses:     make([]string, 0, 6),
+		attempts:    0,
+		maxAttempts: maxAttempts,
 	}
 }
 
 func (g *WordleGame) Run() {
-	g.runWithError("")
+	g.runWithError(Ok)
 }
 
 func (g *WordleGame) runWithError(errorMsg string) {
 	g.attempts++
 
-	clearScreen()
+	io.ClearScreen()
 
 	for _, guess := range g.guesses {
 		fmt.Println(guess)
 	}
 
-	if errorMsg != "" {
+	if errorMsg != Ok {
 		fmt.Println(errorMsg)
 	}
 
 	fmt.Printf("Attempt %d/%d: ", g.attempts, g.maxAttempts)
 
-	g.userGuess = getUserInput()
+	g.userGuess = io.GetUserInput()
 
 	if len(g.userGuess) != 5 {
 		g.attempts--
-		g.runWithError("Word must be 5 chars long!")
+		g.runWithError(IsNotFiveCharsLongErr)
 		return
 	}
 
 	if !g.dict.Contains(g.userGuess) {
 		g.attempts--
-		g.runWithError("Word is not in dictionary!")
+		g.runWithError(NotInDictionaryErr)
 		return
 	}
 
@@ -82,38 +71,7 @@ func (g *WordleGame) runWithError(errorMsg string) {
 		return
 	}
 
-	g.runWithError("")
-}
-
-func getUserInput() string {
-	var input string
-
-	_, err := fmt.Scanln(&input)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	input = strings.TrimSpace(input)
-
-	if input == "" {
-		fmt.Println("Input cannot be empty!")
-		return getUserInput()
-	}
-
-	return strings.ToLower(input)
-}
-
-func clearScreen() {
-	if runtime.GOOS == "windows" {
-		cmd := exec.Command("cmd", "/c", "cls")
-		cmd.Stdout = os.Stdout
-		cmd.Run()
-	} else {
-		cmd := exec.Command("clear")
-		cmd.Stdout = os.Stdout
-		cmd.Run()
-	}
+	g.runWithError(Ok)
 }
 
 func (g *WordleGame) compare() []byte {
