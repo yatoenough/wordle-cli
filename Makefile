@@ -3,10 +3,10 @@ DIST_DIR=dist
 
 build:
 	@mkdir -p $(DIST_DIR)
-	@go build -o $(DIST_DIR)/$(BINARY_NAME) ./src
+	@go build -o $(DIST_DIR)/$(BINARY_NAME) ./cmd/wordle
 
 run:
-	@go build -o $(DIST_DIR)/$(BINARY_NAME) ./src
+	@go build -o $(DIST_DIR)/$(BINARY_NAME) ./cmd/wordle
 	@./$(DIST_DIR)/$(BINARY_NAME)
 
 clean:
