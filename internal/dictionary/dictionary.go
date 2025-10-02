@@ -27,6 +27,16 @@ func (d *Dictionary) GetRandomWord() string {
 	return d.Words[i]
 }
 
+func (d *Dictionary) Contains(word string) bool {
+	word = strings.ToLower(strings.TrimSpace(word))
+	for _, w := range d.Words {
+		if strings.ToLower(w) == word {
+			return true
+		}
+	}
+	return false
+}
+
 func parseDictionary(dict string) []string {
 	lines := strings.Split(dict, "\n")
 	parsed := make([]string, 0, len(lines))
