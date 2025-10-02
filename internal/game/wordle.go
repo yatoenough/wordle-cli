@@ -3,6 +3,9 @@ package game
 import (
 	"fmt"
 	"log"
+	"os"
+	"os/exec"
+	"runtime"
 	"strings"
 
 	"github.com/yatoenough/wordle-cli/internal/dictionary"
@@ -21,6 +24,7 @@ type WordleGame struct {
 	dict        *dictionary.Dictionary
 	attempts    int
 	maxAttempts int
+	guesses     []string
 }
 
 func NewWordleGame(wordToGuess string, dict *dictionary.Dictionary) *WordleGame {
@@ -30,26 +34,40 @@ func NewWordleGame(wordToGuess string, dict *dictionary.Dictionary) *WordleGame 
 		userGuess:   "",
 		attempts:    0,
 		maxAttempts: 6,
+		guesses:     make([]string, 0, 6),
 	}
 }
 
 func (g *WordleGame) Run() {
+	g.runWithError("")
+}
+
+func (g *WordleGame) runWithError(errorMsg string) {
 	g.attempts++
+
+	clearScreen()
+
+	for _, guess := range g.guesses {
+		fmt.Println(guess)
+	}
+
+	if errorMsg != "" {
+		fmt.Println(errorMsg)
+	}
+
 	fmt.Printf("Attempt %d/%d: ", g.attempts, g.maxAttempts)
 
 	g.userGuess = getUserInput()
 
 	if len(g.userGuess) != 5 {
-		fmt.Println("Word must be 5 chars long!")
 		g.attempts--
-		g.Run()
+		g.runWithError("Word must be 5 chars long!")
 		return
 	}
 
 	if !g.dict.Contains(g.userGuess) {
-		fmt.Println("Word not in dictionary!")
 		g.attempts--
-		g.Run()
+		g.runWithError("Word is not in dictionary!")
 		return
 	}
 
@@ -64,7 +82,7 @@ func (g *WordleGame) Run() {
 		return
 	}
 
-	g.Run()
+	g.runWithError("")
 }
 
 func getUserInput() string {
@@ -84,6 +102,18 @@ func getUserInput() string {
 	}
 
 	return strings.ToLower(input)
+}
+
+func clearScreen() {
+	if runtime.GOOS == "windows" {
+		cmd := exec.Command("cmd", "/c", "cls")
+		cmd.Stdout = os.Stdout
+		cmd.Run()
+	} else {
+		cmd := exec.Command("clear")
+		cmd.Stdout = os.Stdout
+		cmd.Run()
+	}
 }
 
 func (g *WordleGame) compare() []byte {
@@ -120,18 +150,22 @@ func (g *WordleGame) compare() []byte {
 func (g *WordleGame) parseResult(result []byte) bool {
 	greenCount := 0
 
+	parsedWord := ""
+
 	for i, char := range result {
 		letter := string(g.userGuess[i])
 		switch char {
 		case 'g':
-			fmt.Print(green + letter + reset)
+			parsedWord += green + letter + reset
 			greenCount++
 		case 'y':
-			fmt.Print(yellow + letter + reset)
+			parsedWord += yellow + letter + reset
 		case 'x':
-			fmt.Print(gray + letter + reset)
+			parsedWord += gray + letter + reset
 		}
 	}
+
+	g.guesses = append(g.guesses, parsedWord)
 
 	fmt.Println()
 
